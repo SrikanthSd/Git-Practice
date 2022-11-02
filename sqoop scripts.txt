@@ -199,6 +199,8 @@ sqoop import \
 --fields-terminated-by ',' \
 -m 1 ;
 
+Name is srikanth
+
 
 
 
