@@ -1,0 +1,208 @@
+##To import data into HDFS specified path (/user/cloudera/sqoop/table_name)
+
+sqoop import \
+--connect jdbc:mysql://localhost/retail_db \
+--username root \
+--password cloudera \
+--table orders \
+--fields-terminated-by ',' \
+--target-dir '/user/cloudera/sqoop/orders';
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+##To import table specific data into HDFS path (/user/cloudera/sqoop/table_name)
+
+sqoop import \
+--connect jdbc:mysql://localhost/retail_db \
+--username root \
+--password cloudera \
+--table orders \
+--where 'order_status in ("COMPLETE")' \
+--fields-terminated-by ',' \
+--target-dir '/user/cloudera/sqoop/completed_orders' ;
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+##To import specific columns from a table into hdfs path (/user/cloudera/sqoop/table_name)
+
+sqoop import \
+--connect jdbc:mysql://localhost/retail_db \
+--username root \
+--password cloudera \
+--table orders \
+--columns 'order_id, order_date' \
+--fields-terminated-by ',' \
+--target-dir '/user/cloudera/sqoop/orders3' ;
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+##To overwrite data in the hdfs path (/user/cloudera/sqoop/table_name)
+
+sqoop import \
+--connect jdbc:mysql://localhost/retail_db \
+--username root \
+--password cloudera \
+--table orders \
+--fields-terminated-by ',' \
+--target-dir '/user/cloudera/sqoop/orders3' \
+--delete-target-dir ;
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+##To reduce the number of part files in hdfs path (/user/cloudera/sqoop/table_name)
+
+sqoop import \
+--connect jdbc:mysql://localhost/retail_db \
+--username root \
+--password cloudera \
+--table orders \
+--fields-terminated-by ',' \
+--target-dir '/user/cloudera/sqoop/orders5' \
+--delete-target-dir \
+--num-mappers 2;
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+##To reduce the number of part files in hdfs path (/user/cloudera/sqoop/table_name)
+
+sqoop import \
+--connect jdbc:mysql://localhost/retail_db \
+--username root \
+--password cloudera \
+--table orders \
+--where 'order_status not in ("PENDING", "COMPLETE")' \
+--fields-terminated-by ',' \
+--target-dir '/user/cloudera/sqoop/completed_orders' \
+--num-mappers 1 \
+--append ;
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+import data from the tables with no primary keys
+
+sqoop import \
+--connect jdbc:mysql://localhost/retail_db \
+--username root \
+--password cloudera \
+--table orders_npk \
+--fields-terminated-by ',' \
+--target-dir '/user/cloudera/sqoop/orders_npk1' \
+--split-by order_id
+(or)
+--num-mappers 1 ;
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+import table data into hdfs in different file formats
+
+sqoop import \
+--connect jdbc:mysql://localhost/retail_db \
+--username root \
+--password cloudera \
+--table orders_npk \
+--as-avrodatafile \ (or) --as-textfile (or) --as-parquetfile \
+--target-dir '/user/cloudera/sqoop/orders_npk3' ;
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Importing data through custom sql query 
+
+sqoop import \
+--connect jdbc:mysql://localhost/retail_db \
+--username root \
+--password cloudera \
+--query "SELECT order_id, order_status FROM orders WHERE \$CONDITIONS " \
+--fields-terminated-by ',' \
+--target-dir '/user/cloudera/sqoop/orders12' \
+--split-by order_id ;
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+sqoop import-all-tables \
+--connect jdbc:mysql://localhost/retail_db \
+--username root \
+--password cloudera \
+--warehouse-dir '/user/cloudera/sqoop/sqoop_data3' \
+--exclude-tables "orders,order_items" \
+--autoreset-to-one-mapper ;
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+import data from rdbms table to hive table
+
+sqoop import \
+--connect jdbc:mysql://localhost/retail_db \
+--username root \
+--password cloudera \
+--table order_items \
+--as-parquetfile \
+--hive-import \
+--hive-database hive_retail_db \
+--hive-table hive_order_items \
+-m 1 ;
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+sqoop import \
+--connect jdbc:mysql://localhost/retail_db \
+--username root \
+--password cloudera \
+--table orders \
+--target-dir '/user/cloudera/sqoop/orders_incremental' \
+--check-column order_date \
+--incremental append \
+--last-value "2022-08-09 10:57:46" \
+--m 1;
+
+sqoop import \
+--connect jdbc:mysql://localhost/retail_db \
+--username root \
+--password cloudera \
+--table orders_delta \
+--target-dir '/user/cloudera/sqoop/orders_incremental' \
+--as-textfile \
+--num-mappers 1;
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+sqoop --options-file /home/cloudera/data/optionsfile \
+--table orders \
+--fields-terminated-by ',' \
+--target-dir '/user/cloudera/sqoop/options_file_test' \
+-m1;
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+sqoop export \
+--connect jdbc:mysql://localhost/banking \
+--username root \
+--password cloudera \
+--table card_transactions \
+--export-dir '/data/card_transactions.csv' \
+--fields-terminated-by ',' ;
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+sqoop job \
+--create srikanth_sqoop1 \
+-- import \
+--connect jdbc:mysql://localhost/retail_db \
+--username root \
+--password-file file:///home/cloudera/data/.sqoop-pwd \
+--table orders \
+--incremental lastmodified \
+--check-column order_date \
+--last-value '2022-08-17 12:29:27.0' \
+--warehouse-dir '/retaildb' \
+--append \
+-m 1;
+
+Insert new records in orders tableinsert into orders values(68892,current_timestamp(),5522,'COMPLETE');insert into orders values(68885,'2014-07-23 00:00:00',5522,'COMPLETE');insert into orders values(68886,'2014-07-23 00:00:00',5522,'COMPLETE');insert into orders values(68887,'2014-07-23 00:00:00',5522,'COMPLETE');insert into orders values(68888,'2014-07-23 00:00:00',5522,'COMPLETE');insert into orders values(68889,'2014-07-23 00:00:00',5522,'COMPLETE');commit;
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+sqoop import \
+--connect jdbc:mysql://localhost/retail_db \
+--username root \
+--password cloudera \
+--table customers \
+--hive-import \
+--hive-database retaildb \
+--as-textfile \
+--fields-terminated-by ',' \
+-m 1 ;
+
+
+
+
+
+
+
+
