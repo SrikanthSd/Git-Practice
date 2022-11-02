@@ -200,6 +200,7 @@ sqoop import \
 -m 1 ;
 
 Name is srikanth
+Name is srija
 
 
 
